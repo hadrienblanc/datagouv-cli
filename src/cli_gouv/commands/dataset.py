@@ -2,7 +2,6 @@
 
 from typing import Any, Optional
 
-import anyio
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -11,6 +10,7 @@ from rich.table import Table
 from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.datasets import DatasetsClient
 from cli_gouv.api.metrics import MetricsClient
+from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
 from cli_gouv.output.table import _safe_str, format_error
 
@@ -21,9 +21,6 @@ app = typer.Typer(
 console = Console()
 
 
-def _run_async(coro: Any) -> Any:
-    """Run async function in sync context."""
-    return anyio.run(lambda: coro)
 
 
 @app.command("show")
@@ -43,7 +40,7 @@ def show_dataset(
             return await client.get_dataset(dataset_id)
 
     try:
-        result = _run_async(_show())
+        result = run_async(_show())
 
         if json_output:
             print(format_raw_json(result))
@@ -78,7 +75,7 @@ def list_resources(
             return await client.list_resources(dataset_id)
 
     try:
-        resources = _run_async(_list())
+        resources = run_async(_list())
 
         if json_output:
             print(format_raw_json(resources))
@@ -114,7 +111,7 @@ def show_metrics(
             return await client.get_dataset_metrics(dataset_id, limit)
 
     try:
-        result = _run_async(_metrics())
+        result = run_async(_metrics())
 
         if json_output:
             print(format_raw_json(result))

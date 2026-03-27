@@ -2,7 +2,6 @@
 
 from typing import Any
 
-import anyio
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -10,6 +9,7 @@ from rich.table import Table
 
 from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.dataservices import DataservicesClient, OpenAPIFetchError
+from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
 from cli_gouv.output.table import _safe_str, format_error
 
@@ -20,9 +20,6 @@ app = typer.Typer(
 console = Console()
 
 
-def _run_async(coro: Any) -> Any:
-    """Run async function in sync context."""
-    return anyio.run(lambda: coro)
 
 
 @app.command("show")
@@ -44,7 +41,7 @@ def show_dataservice(
             return await client.get_dataservice(dataservice_id)
 
     try:
-        result = _run_async(_show())
+        result = run_async(_show())
 
         if json_output:
             print(format_raw_json(result))
@@ -81,7 +78,7 @@ def show_openapi(
             return await client.get_openapi_spec(dataservice_id)
 
     try:
-        result = _run_async(_openapi())
+        result = run_async(_openapi())
 
         if json_output:
             print(format_raw_json(result))

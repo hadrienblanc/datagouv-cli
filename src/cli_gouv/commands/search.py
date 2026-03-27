@@ -2,13 +2,13 @@
 
 from typing import Any, Optional
 
-import anyio
 import typer
 from rich.console import Console
 
 from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.dataservices import DataservicesClient
 from cli_gouv.api.datasets import DatasetsClient
+from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
 from cli_gouv.output.table import (
     format_datasets_table,
@@ -24,9 +24,6 @@ app = typer.Typer(
 console = Console()
 
 
-def _run_async(coro: Any) -> Any:
-    """Run async function in sync context."""
-    return anyio.run(lambda: coro)
 
 
 @app.command("datasets")
@@ -59,7 +56,7 @@ def search_datasets(
             )
 
     try:
-        result = _run_async(_search())
+        result = run_async(_search())
 
         if json_output:
             # Output raw JSON for piping to other tools
@@ -112,7 +109,7 @@ def search_dataservices(
             )
 
     try:
-        result = _run_async(_search())
+        result = run_async(_search())
 
         if json_output:
             print(format_raw_json(result))

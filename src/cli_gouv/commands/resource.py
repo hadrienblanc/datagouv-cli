@@ -2,13 +2,13 @@
 
 from typing import Any, Optional
 
-import anyio
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.resources import ResourceDownloadError, ResourcesClient
+from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
 from cli_gouv.output.table import _safe_str, format_error
 
@@ -19,9 +19,6 @@ app = typer.Typer(
 console = Console()
 
 
-def _run_async(coro: Any) -> Any:
-    """Run async function in sync context."""
-    return anyio.run(lambda: coro)
 
 
 @app.command("query")
@@ -52,7 +49,7 @@ def query_resource(
             )
 
     try:
-        result = _run_async(_query())
+        result = run_async(_query())
 
         if json_output:
             print(format_raw_json(result))
@@ -87,7 +84,7 @@ def show_schema(
             return await client.get_schema(resource_id)
 
     try:
-        result = _run_async(_schema())
+        result = run_async(_schema())
 
         if json_output:
             print(format_raw_json(result))
@@ -124,7 +121,7 @@ def download_resource(
             return await client.download(url)
 
     try:
-        content = _run_async(_download())
+        content = run_async(_download())
 
         if output:
             # Write to file
