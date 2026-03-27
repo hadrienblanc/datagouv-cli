@@ -31,15 +31,9 @@ def test_no_args_shows_help() -> None:
     assert "Commands" in result.stdout  # Shows available commands
 
 
-def test_hello_command() -> None:
-    """Test hello command."""
-    result = runner.invoke(app, ["hello"])
+def test_search_help() -> None:
+    """Test search command help."""
+    result = runner.invoke(app, ["search", "--help"])
     assert result.exit_code == 0
-    assert "Hello World!" in result.stdout
-
-
-def test_hello_with_name() -> None:
-    """Test hello command with custom name."""
-    result = runner.invoke(app, ["hello", "data.gouv"])
-    assert result.exit_code == 0
-    assert "Hello data.gouv!" in result.stdout
+    assert "datasets" in result.stdout.lower()
+    assert "dataservices" in result.stdout.lower()

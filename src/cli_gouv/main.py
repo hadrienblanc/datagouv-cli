@@ -4,6 +4,7 @@ import typer
 from rich.console import Console
 
 from cli_gouv import __version__
+from cli_gouv.commands.search import app as search_app
 
 app = typer.Typer(
     name="cli-gouv",
@@ -19,6 +20,10 @@ def version_callback(value: bool) -> None:
     if value:
         console.print(f"cli-gouv version {__version__}")
         raise typer.Exit()
+
+
+# Register sub-commands
+app.add_typer(search_app, name="search")
 
 
 @app.callback()
@@ -37,14 +42,6 @@ def main(
     Search datasets, explore resources, query data, and more.
     """
     pass
-
-
-@app.command()
-def hello(
-    name: str = typer.Argument("World", help="Name to greet"),
-) -> None:
-    """Simple greeting command for testing."""
-    console.print(f"[green]Hello {name}![/green] from CLI-Gouv")
 
 
 if __name__ == "__main__":
