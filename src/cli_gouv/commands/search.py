@@ -6,9 +6,10 @@ import anyio
 import typer
 from rich.console import Console
 
-from cli_gouv.api.datasets import DatasetsClient
+from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.dataservices import DataservicesClient
-from cli_gouv.output.json import format_json
+from cli_gouv.api.datasets import DatasetsClient
+from cli_gouv.output.json import format_raw_json
 from cli_gouv.output.table import (
     format_datasets_table,
     format_dataservices_table,
@@ -25,12 +26,11 @@ console = Console()
 
 def _run_async(coro: Any) -> Any:
     """Run async function in sync context."""
-    return anyio.from_thread.run(coro)
+    return anyio.run(lambda: coro)
 
 
 @app.command("datasets")
 def search_datasets(
-    ctx: typer.Context,
     query: str = typer.Argument(..., help="Search query"),
     page: int = typer.Option(1, "--page", "-p", min=1, help="Page number"),
     page_size: int = typer.Option(20, "--size", "-s", min=1, max=100, help="Results per page"),
@@ -47,9 +47,9 @@ def search_datasets(
         cli-gouv search datasets "énergie" --sort -created --size 50
     """
 
-    async def _search() -> None:
+    async def _search() -> Any:
         async with DatasetsClient() as client:
-            result = await client.search(
+            return await client.search(
                 query=query,
                 page=page,
                 page_size=page_size,
@@ -58,21 +58,27 @@ def search_datasets(
                 sort=sort,
             )
 
-            if json_output:
-                format_json(result, console)
-            else:
-                format_datasets_table(result.get("data", []), console)
-                format_pagination_info(
-                    result.get("page", page),
-                    result.get("pagesize", page_size),
-                    result.get("total", 0),
-                    console,
-                )
-
     try:
-        _run_async(_search())
+        result = _run_async(_search())
+
+        if json_output:
+            # Output raw JSON for piping to other tools
+            print(format_raw_json(result))
+        else:
+            data = result.get("data", [])
+            format_datasets_table(data, console)
+            format_pagination_info(
+                result.get("page", page),
+                result.get("pagesize", page_size),
+                result.get("total", 0),
+                console,
+            )
+
     except ValueError as e:
         format_error(str(e), console)
+        raise typer.Exit(1)
+    except DataGouvAPIError as e:
+        format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
     except Exception as e:
         format_error(f"Search failed: {e}", console)
@@ -81,7 +87,6 @@ def search_datasets(
 
 @app.command("dataservices")
 def search_dataservices(
-    ctx: typer.Context,
     query: str = typer.Argument(..., help="Search query"),
     page: int = typer.Option(1, "--page", "-p", min=1, help="Page number"),
     page_size: int = typer.Option(20, "--size", "-s", min=1, max=100, help="Results per page"),
@@ -96,9 +101,9 @@ def search_dataservices(
         cli-gouv search dataservices "géocodage" --org ban
     """
 
-    async def _search() -> None:
+    async def _search() -> Any:
         async with DataservicesClient() as client:
-            result = await client.search(
+            return await client.search(
                 query=query,
                 page=page,
                 page_size=page_size,
@@ -106,21 +111,26 @@ def search_dataservices(
                 tag=tag,
             )
 
-            if json_output:
-                format_json(result, console)
-            else:
-                format_dataservices_table(result.get("data", []), console)
-                format_pagination_info(
-                    result.get("page", page),
-                    result.get("pagesize", page_size),
-                    result.get("total", 0),
-                    console,
-                )
-
     try:
-        _run_async(_search())
+        result = _run_async(_search())
+
+        if json_output:
+            print(format_raw_json(result))
+        else:
+            data = result.get("data", [])
+            format_dataservices_table(data, console)
+            format_pagination_info(
+                result.get("page", page),
+                result.get("pagesize", page_size),
+                result.get("total", 0),
+                console,
+            )
+
     except ValueError as e:
         format_error(str(e), console)
+        raise typer.Exit(1)
+    except DataGouvAPIError as e:
+        format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
     except Exception as e:
         format_error(f"Search failed: {e}", console)
