@@ -1,6 +1,6 @@
 """Dataset command for viewing dataset details."""
 
-from typing import Any, Optional
+from typing import Any
 
 import typer
 from rich.console import Console

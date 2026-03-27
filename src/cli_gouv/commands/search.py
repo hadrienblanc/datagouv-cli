@@ -1,6 +1,6 @@
 """Search command for datasets and dataservices."""
 
-from typing import Any, Optional
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -31,9 +31,9 @@ def search_datasets(
     query: str = typer.Argument(..., help="Search query"),
     page: int = typer.Option(1, "--page", "-p", min=1, help="Page number"),
     page_size: int = typer.Option(20, "--size", "-s", min=1, max=100, help="Results per page"),
-    organization: Optional[str] = typer.Option(None, "--org", "-o", help="Filter by organization"),
-    tag: Optional[str] = typer.Option(None, "--tag", "-t", help="Filter by tag"),
-    sort: Optional[str] = typer.Option(None, "--sort", help="Sort by field (e.g., '-created', 'title')"),
+    organization: str | None = typer.Option(None, "--org", "-o", help="Filter by organization"),
+    tag: str | None = typer.Option(None, "--tag", "-t", help="Filter by tag"),
+    sort: str | None = typer.Option(None, "--sort", help="Sort by field (e.g., '-created', 'title')"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Output as JSON"),
 ) -> None:
     """Search for datasets on data.gouv.fr.
@@ -87,8 +87,8 @@ def search_dataservices(
     query: str = typer.Argument(..., help="Search query"),
     page: int = typer.Option(1, "--page", "-p", min=1, help="Page number"),
     page_size: int = typer.Option(20, "--size", "-s", min=1, max=100, help="Results per page"),
-    organization: Optional[str] = typer.Option(None, "--org", "-o", help="Filter by organization"),
-    tag: Optional[str] = typer.Option(None, "--tag", "-t", help="Filter by tag"),
+    organization: str | None = typer.Option(None, "--org", "-o", help="Filter by organization"),
+    tag: str | None = typer.Option(None, "--tag", "-t", help="Filter by tag"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Output as JSON"),
 ) -> None:
     """Search for dataservices (external APIs) on data.gouv.fr.

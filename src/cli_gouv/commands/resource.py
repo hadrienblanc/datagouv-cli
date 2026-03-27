@@ -1,6 +1,6 @@
 """Resource command for querying and downloading resources."""
 
-from typing import Any, Optional
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -24,7 +24,7 @@ console = Console()
 @app.command("query")
 def query_resource(
     resource_id: str = typer.Argument(..., help="Resource ID"),
-    where: Optional[str] = typer.Option(None, "--where", "-w", help="SQL-like WHERE clause"),
+    where: str | None = typer.Option(None, "--where", "-w", help="SQL-like WHERE clause"),
     page: int = typer.Option(1, "--page", "-p", min=1, help="Page number"),
     page_size: int = typer.Option(20, "--size", "-s", min=1, max=200, help="Rows per page"),
     json_output: bool = typer.Option(False, "--json", "-j", help="Output as JSON"),
@@ -105,7 +105,7 @@ def show_schema(
 @app.command("download")
 def download_resource(
     url: str = typer.Argument(..., help="Resource download URL"),
-    output: Optional[str] = typer.Option(None, "--output", "-o", help="Output file path"),
+    output: str | None = typer.Option(None, "--output", "-o", help="Output file path"),
 ) -> None:
     """Download a resource file.
 
