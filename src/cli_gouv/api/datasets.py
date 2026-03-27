@@ -76,16 +76,3 @@ class DatasetsClient(BaseClient):
         dataset = await self.get_dataset(dataset_id)
         return dataset.get("resources", [])
 
-    async def get_metrics(self, dataset_id: str) -> dict[str, Any]:
-        """Get metrics (views, downloads) for a dataset.
-
-        Args:
-            dataset_id: Dataset ID.
-
-        Returns:
-            Metrics data with monthly statistics.
-        """
-        return await self._get(
-            self.METRICS_API_URL,
-            f"/datasets/{dataset_id}/",
-        )
