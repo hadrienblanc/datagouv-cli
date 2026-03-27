@@ -4,6 +4,7 @@ import typer
 from rich.console import Console
 
 from cli_gouv import __version__
+from cli_gouv.commands.dataset import app as dataset_app
 from cli_gouv.commands.search import app as search_app
 
 app = typer.Typer(
@@ -23,6 +24,7 @@ def version_callback(value: bool) -> None:
 
 
 # Register sub-commands
+app.add_typer(dataset_app, name="dataset")
 app.add_typer(search_app, name="search")
 
 
