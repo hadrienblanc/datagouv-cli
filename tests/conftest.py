@@ -2,6 +2,14 @@
 
 import pytest
 
+import cli_gouv.api.client as client_mod
+
+
+@pytest.fixture(autouse=True)
+def _fast_retry(monkeypatch):
+    """Disable retry backoff in tests for speed."""
+    monkeypatch.setattr(client_mod, "RETRY_BACKOFF_BASE", 0.0)
+
 
 @pytest.fixture
 def mock_dataset_response() -> dict:

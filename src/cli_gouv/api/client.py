@@ -1,5 +1,6 @@
 """Base HTTP client for data.gouv.fr APIs."""
 
+import asyncio
 import json
 from urllib.parse import urlparse
 from typing import Any
@@ -7,6 +8,10 @@ from typing import Any
 import httpx
 
 ALLOWED_URL_SCHEMES = ("https",)
+
+MAX_RETRIES = 3
+RETRY_BACKOFF_BASE = 1.0
+RETRYABLE_STATUS_CODES = (429, 500, 502, 503, 504)
 
 
 class DataGouvAPIError(Exception):
@@ -43,10 +48,10 @@ class JSONParseError(DataGouvAPIError):
 
 
 class BaseClient:
-    """Base HTTP client with error handling.
+    """Base HTTP client with error handling and retry logic.
 
-    Note: This client does not implement automatic retries.
-    For production use, consider adding retry logic with exponential backoff.
+    Retries transient errors (429, 5xx, timeouts) up to MAX_RETRIES times
+    with exponential backoff.
     """
 
     # API endpoints
@@ -86,7 +91,10 @@ class BaseClient:
         url: str,
         params: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        """Make an HTTP request with error handling.
+        """Make an HTTP request with retry and error handling.
+
+        Retries up to MAX_RETRIES times on transient errors (429, 5xx, timeouts)
+        with exponential backoff.
 
         Args:
             method: HTTP method (GET, POST, etc.)
@@ -98,50 +106,66 @@ class BaseClient:
 
         Raises:
             NotFoundError: Resource not found.
-            RateLimitError: Rate limit exceeded.
-            ServerError: Server error.
+            RateLimitError: Rate limit exceeded after retries.
+            ServerError: Server error after retries.
             JSONParseError: Failed to parse JSON response.
             DataGouvAPIError: Other API errors.
         """
         client = self._get_client()
+        last_error: Exception | None = None
 
-        try:
-            response = await client.request(method, url, params=params)
-
-            # Handle HTTP errors
-            if response.status_code == 404:
-                raise NotFoundError(
-                    f"Resource not found: {url}",
-                    status_code=404,
-                )
-            if response.status_code == 429:
-                raise RateLimitError(
-                    "Rate limit exceeded. Please wait before retrying.",
-                    status_code=429,
-                )
-            if response.status_code >= 500:
-                raise ServerError(
-                    f"Server error ({response.status_code}): {response.text[:200]}",
-                    status_code=response.status_code,
-                )
-            if response.status_code >= 400:
-                raise DataGouvAPIError(
-                    f"API error ({response.status_code}): {response.text[:200]}",
-                    status_code=response.status_code,
-                )
-
-            # Parse JSON with error handling
+        for attempt in range(MAX_RETRIES):
             try:
-                return response.json()
-            except json.JSONDecodeError as e:
-                raise JSONParseError(
-                    f"Failed to parse JSON response from {url}: {e}",
-                ) from e
+                response = await client.request(method, url, params=params)
 
-        except httpx.TimeoutException as e:
-            raise DataGouvAPIError(f"Request timed out: {url}") from e
-        except httpx.RequestError as e:
-            raise DataGouvAPIError(f"Request failed: {e}") from e
+                # Non-retryable client errors
+                if response.status_code == 404:
+                    raise NotFoundError(
+                        f"Resource not found: {url}",
+                        status_code=404,
+                    )
+                if response.status_code >= 400 and response.status_code not in RETRYABLE_STATUS_CODES:
+                    raise DataGouvAPIError(
+                        f"API error ({response.status_code}): {response.text[:200]}",
+                        status_code=response.status_code,
+                    )
+
+                # Retryable errors
+                if response.status_code in RETRYABLE_STATUS_CODES:
+                    if attempt < MAX_RETRIES - 1:
+                        await asyncio.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                        continue
+                    # Last attempt failed
+                    if response.status_code == 429:
+                        raise RateLimitError(
+                            "Rate limit exceeded after retries.",
+                            status_code=429,
+                        )
+                    raise ServerError(
+                        f"Server error ({response.status_code}): {response.text[:200]}",
+                        status_code=response.status_code,
+                    )
+
+                # Parse JSON with error handling
+                try:
+                    return response.json()
+                except json.JSONDecodeError as e:
+                    raise JSONParseError(
+                        f"Failed to parse JSON response from {url}: {e}",
+                    ) from e
+
+            except httpx.TimeoutException as e:
+                last_error = e
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+            except httpx.RequestError as e:
+                last_error = e
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(RETRY_BACKOFF_BASE * (2 ** attempt))
+                    continue
+
+        raise DataGouvAPIError(f"Request failed after {MAX_RETRIES} attempts: {last_error}") from last_error
 
     @staticmethod
     def validate_url(url: str) -> None:
