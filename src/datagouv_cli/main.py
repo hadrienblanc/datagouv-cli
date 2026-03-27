@@ -32,41 +32,6 @@ app.add_typer(resource_app, name="resource")
 app.add_typer(search_app, name="search")
 
 
-@app.command("mcp")
-def run_mcp(
-    transport: str = typer.Option(
-        "stdio",
-        "--transport",
-        "-t",
-        help="Transport mode: stdio or sse",
-    ),
-    port: int = typer.Option(
-        8000,
-        "--port",
-        "-p",
-        help="Port for SSE transport",
-    ),
-) -> None:
-    """Start the MCP server for LLM integration.
-
-    Exposes data.gouv.fr tools via Model Context Protocol.
-
-    Examples:
-        datagouv-cli mcp
-        datagouv-cli mcp --transport sse --port 8080
-    """
-    from datagouv_cli.mcp_server import mcp as mcp_server
-
-    if transport == "stdio":
-        mcp_server.run(transport="stdio")
-    elif transport == "sse":
-        mcp_server.run(transport="sse", port=port)
-    else:
-        console.print(f"[red]Error:[/red] Unknown transport: {transport}")
-        console.print("[dim]Supported: stdio, sse[/dim]")
-        raise typer.Exit(1)
-
-
 @app.callback()
 def main(
     version: bool = typer.Option(
