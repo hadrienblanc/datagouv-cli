@@ -31,7 +31,8 @@ class ResourcesClient(BaseClient):
 
         Args:
             resource_id: Resource ID (must be CSV or XLS).
-            query: SQL-like query string (WHERE clause).
+            query: SQL-like query string (WHERE clause). Passed as-is to the
+                Tabular API which handles validation. Not sanitized client-side.
             page: Page number (1-indexed, min 1).
             page_size: Number of rows per page (max 200, min 1).
             with_columns: Include column information in response.
