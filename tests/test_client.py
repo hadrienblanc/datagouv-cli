@@ -7,6 +7,7 @@ from httpx import Response
 from cli_gouv.api.client import (
     BaseClient,
     DataGouvAPIError,
+    JSONParseError,
     NotFoundError,
     RateLimitError,
     ServerError,
@@ -105,3 +106,14 @@ class TestBaseClient:
                 assert result == {"ok": True}
                 # Verify the request was made
                 assert route.called
+
+    @pytest.mark.asyncio
+    async def test_json_parse_error(self) -> None:
+        """Test JSON parsing error handling."""
+        async with BaseClient() as client:
+            with respx.mock:
+                respx.get("https://example.com/api/invalid-json").mock(
+                    return_value=Response(200, text="Not valid JSON {{{")
+                )
+                with pytest.raises(JSONParseError, match="Failed to parse JSON"):
+                    await client._get("https://example.com", "/api/invalid-json")

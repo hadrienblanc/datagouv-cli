@@ -149,3 +149,17 @@ class TestDatasetsClient:
                 resources = await client.list_resources("dataset-1")
                 assert len(resources) == 1
                 assert resources[0]["format"] == "csv"
+
+    @pytest.mark.asyncio
+    async def test_search_page_validation(self) -> None:
+        """Test that page must be >= 1."""
+        async with DatasetsClient() as client:
+            with pytest.raises(ValueError, match="page must be >= 1"):
+                await client.search("test", page=0)
+
+    @pytest.mark.asyncio
+    async def test_search_page_size_validation(self) -> None:
+        """Test that page_size must be >= 1."""
+        async with DatasetsClient() as client:
+            with pytest.raises(ValueError, match="page_size must be >= 1"):
+                await client.search("test", page_size=0)

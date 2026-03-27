@@ -1,5 +1,6 @@
 """Base HTTP client for data.gouv.fr APIs."""
 
+import json
 from typing import Any
 
 import httpx
@@ -32,8 +33,18 @@ class ServerError(DataGouvAPIError):
     pass
 
 
+class JSONParseError(DataGouvAPIError):
+    """Error parsing JSON response."""
+
+    pass
+
+
 class BaseClient:
-    """Base HTTP client with error handling and retry logic."""
+    """Base HTTP client with error handling.
+
+    Note: This client does not implement automatic retries.
+    For production use, consider adding retry logic with exponential backoff.
+    """
 
     # API endpoints
     MAIN_API_URL = "https://www.data.gouv.fr/api/1"
@@ -86,6 +97,7 @@ class BaseClient:
             NotFoundError: Resource not found.
             RateLimitError: Rate limit exceeded.
             ServerError: Server error.
+            JSONParseError: Failed to parse JSON response.
             DataGouvAPIError: Other API errors.
         """
         client = self._get_client()
@@ -115,7 +127,13 @@ class BaseClient:
                     status_code=response.status_code,
                 )
 
-            return response.json()
+            # Parse JSON with error handling
+            try:
+                return response.json()
+            except json.JSONDecodeError as e:
+                raise JSONParseError(
+                    f"Failed to parse JSON response from {url}: {e}",
+                ) from e
 
         except httpx.TimeoutException as e:
             raise DataGouvAPIError(f"Request timed out: {url}") from e

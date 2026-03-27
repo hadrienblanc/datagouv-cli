@@ -2,7 +2,13 @@
 
 from typing import Any
 
-from cli_gouv.api.client import BaseClient
+from cli_gouv.api.client import BaseClient, DataGouvAPIError
+
+
+class OpenAPIFetchError(DataGouvAPIError):
+    """Error fetching OpenAPI specification."""
+
+    pass
 
 
 class DataservicesClient(BaseClient):
@@ -20,14 +26,22 @@ class DataservicesClient(BaseClient):
 
         Args:
             query: Search query string.
-            page: Page number (1-indexed).
-            page_size: Number of results per page (max 100).
+            page: Page number (1-indexed, min 1).
+            page_size: Number of results per page (max 100, min 1).
             organization: Filter by organization ID or name.
             tag: Filter by tag.
 
         Returns:
             Search results with pagination info.
+
+        Raises:
+            ValueError: If page or page_size are out of bounds.
         """
+        if page < 1:
+            raise ValueError("page must be >= 1")
+        if page_size < 1:
+            raise ValueError("page_size must be >= 1")
+
         params: dict[str, Any] = {
             "q": query,
             "page": page,
@@ -66,6 +80,7 @@ class DataservicesClient(BaseClient):
 
         Raises:
             ValueError: If dataservice has no OpenAPI URL.
+            OpenAPIFetchError: If fetching the spec fails.
         """
         dataservice = await self.get_dataservice(dataservice_id)
         openapi_url = dataservice.get("openapi_url")
@@ -73,11 +88,26 @@ class DataservicesClient(BaseClient):
         if not openapi_url:
             raise ValueError(f"No OpenAPI URL for dataservice {dataservice_id}")
 
-        # Fetch the OpenAPI spec directly
+        # Fetch the OpenAPI spec directly from external URL
         client = self._get_client()
-        response = await client.get(openapi_url)
 
-        if response.status_code != 200:
-            raise ValueError(f"Failed to fetch OpenAPI spec: HTTP {response.status_code}")
+        try:
+            response = await client.get(openapi_url)
 
-        return response.json()
+            if response.status_code == 404:
+                raise OpenAPIFetchError(
+                    f"OpenAPI spec not found: {openapi_url}",
+                    status_code=404,
+                )
+            if response.status_code != 200:
+                raise OpenAPIFetchError(
+                    f"Failed to fetch OpenAPI spec: HTTP {response.status_code}",
+                    status_code=response.status_code,
+                )
+
+            return response.json()
+
+        except Exception as e:
+            if isinstance(e, (OpenAPIFetchError, ValueError)):
+                raise
+            raise OpenAPIFetchError(f"Failed to fetch OpenAPI spec: {e}") from e

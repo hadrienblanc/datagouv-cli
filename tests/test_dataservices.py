@@ -4,7 +4,7 @@ import pytest
 import respx
 from httpx import Response
 
-from cli_gouv.api.dataservices import DataservicesClient
+from cli_gouv.api.dataservices import DataservicesClient, OpenAPIFetchError
 
 
 class TestDataservicesClient:
@@ -109,6 +109,20 @@ class TestDataservicesClient:
                 assert "tag=geocodage" in str(request.url)
 
     @pytest.mark.asyncio
+    async def test_search_page_validation(self) -> None:
+        """Test that page must be >= 1."""
+        async with DataservicesClient() as client:
+            with pytest.raises(ValueError, match="page must be >= 1"):
+                await client.search("test", page=0)
+
+    @pytest.mark.asyncio
+    async def test_search_page_size_validation(self) -> None:
+        """Test that page_size must be >= 1."""
+        async with DataservicesClient() as client:
+            with pytest.raises(ValueError, match="page_size must be >= 1"):
+                await client.search("test", page_size=0)
+
+    @pytest.mark.asyncio
     async def test_get_dataservice(
         self, mock_dataservice_response: dict
     ) -> None:
@@ -172,5 +186,22 @@ class TestDataservicesClient:
                 respx.get("https://api-adresse.fr/swagger.json").mock(
                     return_value=Response(500, text="Internal error")
                 )
-                with pytest.raises(ValueError, match="Failed to fetch"):
+                with pytest.raises(OpenAPIFetchError, match="Failed to fetch"):
+                    await client.get_openapi_spec("ds-1")
+
+    @pytest.mark.asyncio
+    async def test_get_openapi_spec_not_found(
+        self,
+        mock_dataservice_response: dict,
+    ) -> None:
+        """Test OpenAPI spec 404 handling."""
+        async with DataservicesClient() as client:
+            with respx.mock:
+                respx.get("https://www.data.gouv.fr/api/1/dataservices/ds-1/").mock(
+                    return_value=Response(200, json=mock_dataservice_response)
+                )
+                respx.get("https://api-adresse.fr/swagger.json").mock(
+                    return_value=Response(404, text="Not found")
+                )
+                with pytest.raises(OpenAPIFetchError, match="not found"):
                     await client.get_openapi_spec("ds-1")

@@ -21,15 +21,23 @@ class DatasetsClient(BaseClient):
 
         Args:
             query: Search query string.
-            page: Page number (1-indexed).
-            page_size: Number of results per page (max 100).
+            page: Page number (1-indexed, min 1).
+            page_size: Number of results per page (max 100, min 1).
             organization: Filter by organization ID or name.
             tag: Filter by tag.
             sort: Sort field (e.g., '-created', 'title').
 
         Returns:
             Search results with pagination info.
+
+        Raises:
+            ValueError: If page or page_size are out of bounds.
         """
+        if page < 1:
+            raise ValueError("page must be >= 1")
+        if page_size < 1:
+            raise ValueError("page_size must be >= 1")
+
         params: dict[str, Any] = {
             "q": query,
             "page": page,

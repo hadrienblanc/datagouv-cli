@@ -4,27 +4,11 @@ import pytest
 import respx
 from httpx import Response
 
-from cli_gouv.api.resources import ResourcesClient
+from cli_gouv.api.resources import ResourcesClient, ResourceDownloadError
 
 
 class TestResourcesClient:
     """Tests for ResourcesClient class."""
-
-    @pytest.fixture
-    def mock_resource_response(self) -> dict:
-        """Sample resource detail response."""
-        return {
-            "id": "resource-1",
-            "title": "Population CSV",
-            "description": "Données de population au format CSV",
-            "format": "csv",
-            "mime": "text/csv",
-            "filesize": 1024000,
-            "url": "https://example.com/population.csv",
-            "checksum": {"type": "sha256", "value": "abc123"},
-            "created_at": "2024-01-01T00:00:00",
-            "last_modified": "2024-06-01T00:00:00",
-        }
 
     @pytest.fixture
     def mock_tabular_response(self) -> dict:
@@ -104,6 +88,20 @@ class TestResourcesClient:
                 assert "with_columns=true" in str(request.url)
 
     @pytest.mark.asyncio
+    async def test_query_tabular_page_validation(self) -> None:
+        """Test that page must be >= 1."""
+        async with ResourcesClient() as client:
+            with pytest.raises(ValueError, match="page must be >= 1"):
+                await client.query_tabular("resource-1", page=0)
+
+    @pytest.mark.asyncio
+    async def test_query_tabular_page_size_validation(self) -> None:
+        """Test that page_size must be >= 1."""
+        async with ResourcesClient() as client:
+            with pytest.raises(ValueError, match="page_size must be >= 1"):
+                await client.query_tabular("resource-1", page_size=0)
+
+    @pytest.mark.asyncio
     async def test_get_schema(self) -> None:
         """Test getting resource schema."""
         schema = {
@@ -121,3 +119,36 @@ class TestResourcesClient:
                 )
                 result = await client.get_schema("resource-1")
                 assert len(result["fields"]) == 2
+
+    @pytest.mark.asyncio
+    async def test_download(self) -> None:
+        """Test downloading resource content."""
+        async with ResourcesClient() as client:
+            with respx.mock:
+                respx.get("https://example.com/data.csv").mock(
+                    return_value=Response(200, content=b"id,name\n1,test")
+                )
+                content = await client.download("https://example.com/data.csv")
+                assert content == b"id,name\n1,test"
+
+    @pytest.mark.asyncio
+    async def test_download_404(self) -> None:
+        """Test download 404 handling."""
+        async with ResourcesClient() as client:
+            with respx.mock:
+                respx.get("https://example.com/notfound.csv").mock(
+                    return_value=Response(404, text="Not found")
+                )
+                with pytest.raises(ResourceDownloadError, match="not found"):
+                    await client.download("https://example.com/notfound.csv")
+
+    @pytest.mark.asyncio
+    async def test_download_500(self) -> None:
+        """Test download server error handling."""
+        async with ResourcesClient() as client:
+            with respx.mock:
+                respx.get("https://example.com/error.csv").mock(
+                    return_value=Response(500, text="Internal error")
+                )
+                with pytest.raises(ResourceDownloadError, match="Failed to download"):
+                    await client.download("https://example.com/error.csv")

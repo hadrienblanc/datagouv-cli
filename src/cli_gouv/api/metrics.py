@@ -17,11 +17,17 @@ class MetricsClient(BaseClient):
 
         Args:
             dataset_id: Dataset ID.
-            limit: Number of months to return (max 100).
+            limit: Number of months to return (max 100, min 1).
 
         Returns:
             Monthly metrics with views and downloads.
+
+        Raises:
+            ValueError: If limit is out of bounds.
         """
+        if limit < 1:
+            raise ValueError("limit must be >= 1")
+
         return await self._get(
             self.METRICS_API_URL,
             f"/datasets/{dataset_id}/",
@@ -37,11 +43,17 @@ class MetricsClient(BaseClient):
 
         Args:
             resource_id: Resource ID.
-            limit: Number of months to return (max 100).
+            limit: Number of months to return (max 100, min 1).
 
         Returns:
             Monthly metrics with downloads.
+
+        Raises:
+            ValueError: If limit is out of bounds.
         """
+        if limit < 1:
+            raise ValueError("limit must be >= 1")
+
         return await self._get(
             self.METRICS_API_URL,
             f"/resources/{resource_id}/",
@@ -65,10 +77,13 @@ class MetricsClient(BaseClient):
             Combined metrics data.
 
         Raises:
-            ValueError: If neither dataset_id nor resource_id is provided.
+            ValueError: If neither dataset_id nor resource_id is provided,
+                or if limit is out of bounds.
         """
         if not dataset_id and not resource_id:
             raise ValueError("Either dataset_id or resource_id must be provided")
+        if limit < 1:
+            raise ValueError("limit must be >= 1")
 
         result: dict[str, Any] = {}
 

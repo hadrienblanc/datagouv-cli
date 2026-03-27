@@ -140,3 +140,24 @@ class TestMetricsClient:
         async with MetricsClient() as client:
             with pytest.raises(ValueError, match="Either dataset_id or resource_id"):
                 await client.get_combined_metrics()
+
+    @pytest.mark.asyncio
+    async def test_dataset_metrics_limit_validation(self) -> None:
+        """Test that limit must be >= 1 for dataset metrics."""
+        async with MetricsClient() as client:
+            with pytest.raises(ValueError, match="limit must be >= 1"):
+                await client.get_dataset_metrics("dataset-1", limit=0)
+
+    @pytest.mark.asyncio
+    async def test_resource_metrics_limit_validation(self) -> None:
+        """Test that limit must be >= 1 for resource metrics."""
+        async with MetricsClient() as client:
+            with pytest.raises(ValueError, match="limit must be >= 1"):
+                await client.get_resource_metrics("resource-1", limit=0)
+
+    @pytest.mark.asyncio
+    async def test_combined_metrics_limit_validation(self) -> None:
+        """Test that limit must be >= 1 for combined metrics."""
+        async with MetricsClient() as client:
+            with pytest.raises(ValueError, match="limit must be >= 1"):
+                await client.get_combined_metrics(dataset_id="dataset-1", limit=0)
