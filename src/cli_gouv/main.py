@@ -9,6 +9,7 @@ app = typer.Typer(
     name="cli-gouv",
     help="CLI to interact with data.gouv.fr - French Open Data platform",
     add_completion=False,
+    no_args_is_help=True,
 )
 console = Console()
 

@@ -22,6 +22,15 @@ def test_help() -> None:
     assert "Open Data" in result.stdout
 
 
+def test_no_args_shows_help() -> None:
+    """Test that no args shows help content."""
+    result = runner.invoke(app, [])
+    # Typer shows help when no_args_is_help=True, but may exit with code 2
+    # The important thing is that help content is shown, not the error message
+    assert "data.gouv.fr" in result.stdout
+    assert "Commands" in result.stdout  # Shows available commands
+
+
 def test_hello_command() -> None:
     """Test hello command."""
     result = runner.invoke(app, ["hello"])
