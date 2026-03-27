@@ -1,10 +1,13 @@
 """Tests for the dataset command."""
 
+import json
+
 import pytest
 import respx
 from httpx import Response
 from typer.testing import CliRunner
 
+from cli_gouv.api.client import BaseClient
 from cli_gouv.main import app
 
 runner = CliRunner()
@@ -42,29 +45,6 @@ def mock_dataset_detail() -> dict:
 
 
 @pytest.fixture
-def mock_resources_list() -> list[dict]:
-    """Sample resources list."""
-    return [
-        {
-            "id": "resource-1",
-            "title": "Population 2024",
-            "format": "csv",
-            "mime": "text/csv",
-            "filesize": 1024000,
-            "last_modified": "2024-05-01T00:00:00",
-        },
-        {
-            "id": "resource-2",
-            "title": "Population 2023",
-            "format": "xlsx",
-            "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "filesize": 2048000,
-            "last_modified": "2024-01-01T00:00:00",
-        },
-    ]
-
-
-@pytest.fixture
 def mock_metrics_response() -> dict:
     """Sample metrics response."""
     return {
@@ -81,7 +61,6 @@ class TestDatasetCommand:
     """Tests for dataset command group."""
 
     def test_dataset_help(self) -> None:
-        """Test dataset command help."""
         result = runner.invoke(app, ["dataset", "--help"])
         assert result.exit_code == 0
         assert "show" in result.stdout.lower()
@@ -89,19 +68,86 @@ class TestDatasetCommand:
         assert "metrics" in result.stdout.lower()
 
     def test_dataset_show_help(self) -> None:
-        """Test dataset show command help."""
         result = runner.invoke(app, ["dataset", "show", "--help"])
         assert result.exit_code == 0
         assert "dataset_id" in result.stdout.lower()
 
     def test_dataset_resources_help(self) -> None:
-        """Test dataset resources command help."""
         result = runner.invoke(app, ["dataset", "resources", "--help"])
         assert result.exit_code == 0
         assert "dataset_id" in result.stdout.lower()
 
     def test_dataset_metrics_help(self) -> None:
-        """Test dataset metrics command help."""
         result = runner.invoke(app, ["dataset", "metrics", "--help"])
         assert result.exit_code == 0
         assert "dataset_id" in result.stdout.lower()
+
+    @respx.mock
+    def test_dataset_show_success(self, mock_dataset_detail: dict) -> None:
+        respx.get(f"{BaseClient.MAIN_API_URL}/datasets/dataset-1/").mock(
+            return_value=Response(200, json=mock_dataset_detail)
+        )
+        result = runner.invoke(app, ["dataset", "show", "dataset-1"])
+        assert result.exit_code == 0
+        assert "Population française" in result.stdout
+        assert "INSEE" in result.stdout
+
+    @respx.mock
+    def test_dataset_show_json(self, mock_dataset_detail: dict) -> None:
+        respx.get(f"{BaseClient.MAIN_API_URL}/datasets/dataset-1/").mock(
+            return_value=Response(200, json=mock_dataset_detail)
+        )
+        result = runner.invoke(app, ["dataset", "show", "dataset-1", "--json"])
+        assert result.exit_code == 0
+        parsed = json.loads(result.stdout)
+        assert parsed["title"] == "Population française"
+
+    @respx.mock
+    def test_dataset_show_not_found(self) -> None:
+        respx.get(f"{BaseClient.MAIN_API_URL}/datasets/unknown/").mock(
+            return_value=Response(404, text="Not found")
+        )
+        result = runner.invoke(app, ["dataset", "show", "unknown"])
+        assert result.exit_code == 1
+        assert "error" in result.stdout.lower()
+
+    @respx.mock
+    def test_dataset_resources_success(self, mock_dataset_detail: dict) -> None:
+        respx.get(f"{BaseClient.MAIN_API_URL}/datasets/dataset-1/").mock(
+            return_value=Response(200, json=mock_dataset_detail)
+        )
+        result = runner.invoke(app, ["dataset", "resources", "dataset-1"])
+        assert result.exit_code == 0
+        assert "Population 2024" in result.stdout
+        assert "csv" in result.stdout.lower()
+
+    @respx.mock
+    def test_dataset_resources_json(self, mock_dataset_detail: dict) -> None:
+        respx.get(f"{BaseClient.MAIN_API_URL}/datasets/dataset-1/").mock(
+            return_value=Response(200, json=mock_dataset_detail)
+        )
+        result = runner.invoke(app, ["dataset", "resources", "dataset-1", "--json"])
+        assert result.exit_code == 0
+        parsed = json.loads(result.stdout)
+        assert isinstance(parsed, list)
+        assert parsed[0]["id"] == "resource-1"
+
+    @respx.mock
+    def test_dataset_metrics_success(self, mock_metrics_response: dict) -> None:
+        respx.get(f"{BaseClient.METRICS_API_URL}/datasets/dataset-1/").mock(
+            return_value=Response(200, json=mock_metrics_response)
+        )
+        result = runner.invoke(app, ["dataset", "metrics", "dataset-1"])
+        assert result.exit_code == 0
+        assert "2024-06" in result.stdout
+        assert "1500" in result.stdout
+
+    @respx.mock
+    def test_dataset_metrics_json(self, mock_metrics_response: dict) -> None:
+        respx.get(f"{BaseClient.METRICS_API_URL}/datasets/dataset-1/").mock(
+            return_value=Response(200, json=mock_metrics_response)
+        )
+        result = runner.invoke(app, ["dataset", "metrics", "dataset-1", "--json"])
+        assert result.exit_code == 0
+        parsed = json.loads(result.stdout)
+        assert "metrics" in parsed
