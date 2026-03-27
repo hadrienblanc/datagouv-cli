@@ -7,11 +7,11 @@ from typing import Any
 import httpx
 from mcp.server.fastmcp import FastMCP
 
-from cli_gouv.api.client import DataGouvAPIError
-from cli_gouv.api.dataservices import DataservicesClient, OpenAPIFetchError
-from cli_gouv.api.datasets import DatasetsClient
-from cli_gouv.api.metrics import MetricsClient
-from cli_gouv.api.resources import ResourcesClient
+from datagouv_cli.api.client import DataGouvAPIError
+from datagouv_cli.api.dataservices import DataservicesClient, OpenAPIFetchError
+from datagouv_cli.api.datasets import DatasetsClient
+from datagouv_cli.api.metrics import MetricsClient
+from datagouv_cli.api.resources import ResourcesClient
 
 # Shared HTTP client for connection pooling across MCP tool calls
 _shared_http_client: httpx.AsyncClient | None = None

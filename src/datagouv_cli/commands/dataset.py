@@ -7,12 +7,12 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cli_gouv.api.client import DataGouvAPIError
-from cli_gouv.api.datasets import DatasetsClient
-from cli_gouv.api.metrics import MetricsClient
-from cli_gouv.commands import run_async
-from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import safe_str, format_error
+from datagouv_cli.api.client import DataGouvAPIError
+from datagouv_cli.api.datasets import DatasetsClient
+from datagouv_cli.api.metrics import MetricsClient
+from datagouv_cli.commands import run_async
+from datagouv_cli.output.json import format_raw_json
+from datagouv_cli.output.table import safe_str, format_error
 
 app = typer.Typer(
     name="dataset",
@@ -31,8 +31,8 @@ def show_dataset(
     """Show detailed information about a dataset.
 
     Examples:
-        cli-gouv dataset show "population-francaise"
-        cli-gouv dataset show "5c4ae510634f413779c9a773" --json
+        datagouv-cli dataset show "population-francaise"
+        datagouv-cli dataset show "5c4ae510634f413779c9a773" --json
     """
 
     async def _show() -> Any:
@@ -66,8 +66,8 @@ def list_resources(
     """List all resources (files) in a dataset.
 
     Examples:
-        cli-gouv dataset resources "population-francaise"
-        cli-gouv dataset resources "5c4ae510634f413779c9a773" --json
+        datagouv-cli dataset resources "population-francaise"
+        datagouv-cli dataset resources "5c4ae510634f413779c9a773" --json
     """
 
     async def _list() -> Any:
@@ -102,8 +102,8 @@ def show_metrics(
     """Show metrics (views, downloads) for a dataset.
 
     Examples:
-        cli-gouv dataset metrics "5c4ae510634f413779c9a773"
-        cli-gouv dataset metrics "5c4ae510634f413779c9a773" --limit 24 --json
+        datagouv-cli dataset metrics "5c4ae510634f413779c9a773"
+        datagouv-cli dataset metrics "5c4ae510634f413779c9a773" --limit 24 --json
     """
 
     async def _metrics() -> Any:

@@ -2,7 +2,7 @@
 
 import pytest
 
-import cli_gouv.api.client as client_mod
+import datagouv_cli.api.client as client_mod
 
 
 @pytest.fixture(autouse=True)

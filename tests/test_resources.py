@@ -4,7 +4,7 @@ import pytest
 import respx
 from httpx import Response
 
-from cli_gouv.api.resources import ResourcesClient, ResourceDownloadError
+from datagouv_cli.api.resources import ResourcesClient, ResourceDownloadError
 
 
 class TestResourcesClient:

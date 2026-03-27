@@ -7,11 +7,11 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from cli_gouv.api.client import DataGouvAPIError
-from cli_gouv.api.dataservices import DataservicesClient, OpenAPIFetchError
-from cli_gouv.commands import run_async
-from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import safe_str, format_error
+from datagouv_cli.api.client import DataGouvAPIError
+from datagouv_cli.api.dataservices import DataservicesClient, OpenAPIFetchError
+from datagouv_cli.commands import run_async
+from datagouv_cli.output.json import format_raw_json
+from datagouv_cli.output.table import safe_str, format_error
 
 app = typer.Typer(
     name="dataservice",
@@ -32,8 +32,8 @@ def show_dataservice(
     Dataservices are external APIs registered on data.gouv.fr.
 
     Examples:
-        cli-gouv dataservice show "api-geo"
-        cli-gouv dataservice show "5c4ae510634f413779c9a773" --json
+        datagouv-cli dataservice show "api-geo"
+        datagouv-cli dataservice show "5c4ae510634f413779c9a773" --json
     """
 
     async def _show() -> Any:
@@ -69,8 +69,8 @@ def show_openapi(
     Displays available endpoints, methods, and parameters.
 
     Examples:
-        cli-gouv dataservice openapi "api-geo"
-        cli-gouv dataservice openapi "5c4ae510634f413779c9a773" --json
+        datagouv-cli dataservice openapi "api-geo"
+        datagouv-cli dataservice openapi "5c4ae510634f413779c9a773" --json
     """
 
     async def _openapi() -> Any:

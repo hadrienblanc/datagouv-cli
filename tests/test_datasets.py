@@ -4,8 +4,8 @@ import pytest
 import respx
 from httpx import Response
 
-from cli_gouv.api.client import NotFoundError
-from cli_gouv.api.datasets import DatasetsClient
+from datagouv_cli.api.client import NotFoundError
+from datagouv_cli.api.datasets import DatasetsClient
 
 
 class TestDatasetsClient:

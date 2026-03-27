@@ -5,12 +5,12 @@ from typing import Any
 import typer
 from rich.console import Console
 
-from cli_gouv.api.client import DataGouvAPIError
-from cli_gouv.api.dataservices import DataservicesClient
-from cli_gouv.api.datasets import DatasetsClient
-from cli_gouv.commands import run_async
-from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import (
+from datagouv_cli.api.client import DataGouvAPIError
+from datagouv_cli.api.dataservices import DataservicesClient
+from datagouv_cli.api.datasets import DatasetsClient
+from datagouv_cli.commands import run_async
+from datagouv_cli.output.json import format_raw_json
+from datagouv_cli.output.table import (
     format_datasets_table,
     format_dataservices_table,
     format_error,
@@ -39,9 +39,9 @@ def search_datasets(
     """Search for datasets on data.gouv.fr.
 
     Examples:
-        cli-gouv search datasets "population"
-        cli-gouv search datasets "immobilier" --org INSEE --tag logement
-        cli-gouv search datasets "énergie" --sort -created --size 50
+        datagouv-cli search datasets "population"
+        datagouv-cli search datasets "immobilier" --org INSEE --tag logement
+        datagouv-cli search datasets "énergie" --sort -created --size 50
     """
 
     async def _search() -> Any:
@@ -94,8 +94,8 @@ def search_dataservices(
     """Search for dataservices (external APIs) on data.gouv.fr.
 
     Examples:
-        cli-gouv search dataservices "adresse"
-        cli-gouv search dataservices "géocodage" --org ban
+        datagouv-cli search dataservices "adresse"
+        datagouv-cli search dataservices "géocodage" --org ban
     """
 
     async def _search() -> Any:

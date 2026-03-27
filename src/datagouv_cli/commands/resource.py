@@ -6,11 +6,11 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from cli_gouv.api.client import DataGouvAPIError
-from cli_gouv.api.resources import ResourceDownloadError, ResourcesClient
-from cli_gouv.commands import run_async
-from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import safe_str, format_error
+from datagouv_cli.api.client import DataGouvAPIError
+from datagouv_cli.api.resources import ResourceDownloadError, ResourcesClient
+from datagouv_cli.commands import run_async
+from datagouv_cli.output.json import format_raw_json
+from datagouv_cli.output.table import safe_str, format_error
 
 app = typer.Typer(
     name="resource",
@@ -34,9 +34,9 @@ def query_resource(
     The resource must be tabular (CSV or Excel) and indexed by the Tabular API.
 
     Examples:
-        cli-gouv resource query "abc123" --where "code_postal = '75001'"
-        cli-gouv resource query "abc123" --page 2 --size 50
-        cli-gouv resource query "abc123" --json
+        datagouv-cli resource query "abc123" --where "code_postal = '75001'"
+        datagouv-cli resource query "abc123" --page 2 --size 50
+        datagouv-cli resource query "abc123" --json
     """
 
     async def _query() -> Any:
@@ -75,8 +75,8 @@ def show_schema(
     """Show schema (columns) for a tabular resource.
 
     Examples:
-        cli-gouv resource schema "abc123"
-        cli-gouv resource schema "abc123" --json
+        datagouv-cli resource schema "abc123"
+        datagouv-cli resource schema "abc123" --json
     """
 
     async def _schema() -> Any:
@@ -112,8 +112,8 @@ def download_resource(
     Note: Use 'dataset resources' to find the download URL for a resource.
 
     Examples:
-        cli-gouv resource download "https://example.com/data.csv"
-        cli-gouv resource download "https://example.com/data.csv" -o ./data.csv
+        datagouv-cli resource download "https://example.com/data.csv"
+        datagouv-cli resource download "https://example.com/data.csv" -o ./data.csv
     """
 
     async def _download() -> bytes:

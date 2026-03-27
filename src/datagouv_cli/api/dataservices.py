@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from cli_gouv.api.client import BaseClient, DataGouvAPIError
+from datagouv_cli.api.client import BaseClient, DataGouvAPIError
 
 
 class OpenAPIFetchError(DataGouvAPIError):

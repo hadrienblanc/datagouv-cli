@@ -3,14 +3,14 @@
 import typer
 from rich.console import Console
 
-from cli_gouv import __version__
-from cli_gouv.commands.dataset import app as dataset_app
-from cli_gouv.commands.dataservice import app as dataservice_app
-from cli_gouv.commands.resource import app as resource_app
-from cli_gouv.commands.search import app as search_app
+from datagouv_cli import __version__
+from datagouv_cli.commands.dataset import app as dataset_app
+from datagouv_cli.commands.dataservice import app as dataservice_app
+from datagouv_cli.commands.resource import app as resource_app
+from datagouv_cli.commands.search import app as search_app
 
 app = typer.Typer(
-    name="cli-gouv",
+    name="datagouv-cli",
     help="CLI to interact with data.gouv.fr - French Open Data platform",
     add_completion=False,
     no_args_is_help=True,
@@ -21,7 +21,7 @@ console = Console()
 def version_callback(value: bool) -> None:
     """Print version and exit."""
     if value:
-        console.print(f"cli-gouv version {__version__}")
+        console.print(f"datagouv-cli version {__version__}")
         raise typer.Exit()
 
 
@@ -52,10 +52,10 @@ def run_mcp(
     Exposes data.gouv.fr tools via Model Context Protocol.
 
     Examples:
-        cli-gouv mcp
-        cli-gouv mcp --transport sse --port 8080
+        datagouv-cli mcp
+        datagouv-cli mcp --transport sse --port 8080
     """
-    from cli_gouv.mcp_server import mcp as mcp_server
+    from datagouv_cli.mcp_server import mcp as mcp_server
 
     if transport == "stdio":
         mcp_server.run(transport="stdio")

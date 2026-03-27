@@ -6,9 +6,9 @@ import httpx
 import pytest
 import respx
 
-from cli_gouv.api.client import BaseClient
-import cli_gouv.mcp_server as mcp_mod
-from cli_gouv.mcp_server import (
+from datagouv_cli.api.client import BaseClient
+import datagouv_cli.mcp_server as mcp_mod
+from datagouv_cli.mcp_server import (
     get_dataservice_info,
     get_dataset_info,
     get_metrics,

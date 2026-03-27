@@ -5,42 +5,35 @@ CLI and MCP server to interact with [data.gouv.fr](https://www.data.gouv.fr/) - 
 ## Installation
 
 ```bash
-# With uv (recommended)
-uv tool install cli-gouv
-
-# With pipx
-pipx install cli-gouv
-
-# With pip
-pip install cli-gouv
+uv tool install datagouv-cli
 ```
 
 ## CLI Usage
 
 ```bash
 # Show help
-cli-gouv --help
+datagouv-cli --help
 
 # Search datasets
-cli-gouv search datasets "immobilier"
-cli-gouv search datasets "population" --org INSEE
+datagouv-cli search datasets "immobilier"
+datagouv-cli search datasets "population" --org INSEE
 
 # Get dataset info
-cli-gouv dataset show <dataset-id>
+datagouv-cli dataset show <dataset-id>
 
 # List resources
-cli-gouv dataset resources <dataset-id>
+datagouv-cli dataset resources <dataset-id>
 
 # Get metrics
-cli-gouv dataset metrics <dataset-id>
+datagouv-cli dataset metrics <dataset-id>
 
 # Query tabular data (CSV/Excel)
-cli-gouv resource query <resource-id> --where "code_postal = '75001'"
-cli-gouv resource schema <resource-id>
+datagouv-cli resource query <resource-id> --where "code_postal = '75001'"
+datagouv-cli resource schema <resource-id>
 
 # Search dataservices (external APIs)
-cli-gouv search dataservices "adresse"
-cli-gouv dataservice openapi <dataservice-id>
+datagouv-cli search dataservices "adresse"
+datagouv-cli dataservice openapi <dataservice-id>
 ```
 
 ## MCP Server
@@ -65,10 +58,10 @@ This package includes an MCP (Model Context Protocol) server that exposes data.g
 
 ```bash
 # Via la CLI (transport stdio par défaut)
-cli-gouv mcp
+datagouv-cli mcp
 
 # Avec transport SSE
-cli-gouv mcp --transport sse --port 8080
+datagouv-cli mcp --transport sse --port 8080
 ```
 
 ### Configurer avec Claude Desktop
@@ -79,7 +72,7 @@ Ajouter dans la config Claude Desktop (`~/Library/Application Support/Claude/cla
 {
   "mcpServers": {
     "datagouv": {
-      "command": "cli-gouv",
+      "command": "datagouv-cli",
       "args": ["mcp"]
     }
   }
@@ -89,7 +82,7 @@ Ajouter dans la config Claude Desktop (`~/Library/Application Support/Claude/cla
 ### Configurer avec Claude Code
 
 ```bash
-claude mcp add datagouv -- cli-gouv mcp
+claude mcp add datagouv -- datagouv-cli mcp
 ```
 
 ## Development
@@ -104,10 +97,10 @@ uv sync
 uv run pytest -v
 
 # Run CLI locally
-uv run cli-gouv --help
+uv run datagouv-cli --help
 
 # Run MCP server locally (stdio)
-uv run cli-gouv mcp
+uv run datagouv-cli mcp
 ```
 
 ## APIs Used

@@ -4,7 +4,7 @@ import pytest
 import respx
 from httpx import Response
 
-from cli_gouv.api.client import (
+from datagouv_cli.api.client import (
     BaseClient,
     DataGouvAPIError,
     JSONParseError,

@@ -2,7 +2,7 @@
 
 from typer.testing import CliRunner
 
-from cli_gouv.main import app
+from datagouv_cli.main import app
 
 runner = CliRunner()
 
@@ -11,7 +11,7 @@ def test_version() -> None:
     """Test --version flag."""
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "cli-gouv version" in result.stdout
+    assert "datagouv-cli version" in result.stdout
 
 
 def test_help() -> None:

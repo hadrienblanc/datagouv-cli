@@ -8,8 +8,8 @@ import respx
 from httpx import Response
 from typer.testing import CliRunner
 
-from cli_gouv.api.client import BaseClient
-from cli_gouv.main import app
+from datagouv_cli.api.client import BaseClient
+from datagouv_cli.main import app
 
 runner = CliRunner()
 

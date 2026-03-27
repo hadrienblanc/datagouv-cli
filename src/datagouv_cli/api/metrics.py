@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from cli_gouv.api.client import BaseClient
+from datagouv_cli.api.client import BaseClient
 
 
 class MetricsClient(BaseClient):

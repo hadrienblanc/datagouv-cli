@@ -4,7 +4,7 @@ import pytest
 import respx
 from httpx import Response
 
-from cli_gouv.api.metrics import MetricsClient
+from datagouv_cli.api.metrics import MetricsClient
 
 
 class TestMetricsClient:

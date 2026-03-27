@@ -1,5 +1,5 @@
 [project]
-name = "cli-gouv"
+name = "datagouv-cli"
 version = "0.1.0"
 description = "CLI to interact with data.gouv.fr - French Open Data platform"
 readme = "README.md"
@@ -25,7 +25,7 @@ dev = [
 ]
 
 [project.scripts]
-cli-gouv = "cli_gouv.main:app"
+datagouv-cli = "datagouv_cli.main:app"
 
 [build-system]
 requires = ["hatchling"]
