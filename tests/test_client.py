@@ -117,3 +117,26 @@ class TestBaseClient:
                 )
                 with pytest.raises(JSONParseError, match="Failed to parse JSON"):
                     await client._get("https://example.com", "/api/invalid-json")
+
+
+class TestURLValidation:
+    """Tests for URL scheme validation."""
+
+    def test_https_url_accepted(self) -> None:
+        BaseClient.validate_url("https://example.com/data.csv")
+
+    def test_http_url_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not allowed"):
+            BaseClient.validate_url("http://example.com/data.csv")
+
+    def test_file_url_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not allowed"):
+            BaseClient.validate_url("file:///etc/passwd")
+
+    def test_ftp_url_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not allowed"):
+            BaseClient.validate_url("ftp://example.com/data.csv")
+
+    def test_empty_scheme_rejected(self) -> None:
+        with pytest.raises(ValueError, match="not allowed"):
+            BaseClient.validate_url("/path/to/local/file")

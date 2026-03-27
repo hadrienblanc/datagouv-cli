@@ -88,11 +88,13 @@ class DataservicesClient(BaseClient):
         if not openapi_url:
             raise ValueError(f"No OpenAPI URL for dataservice {dataservice_id}")
 
+        self.validate_url(openapi_url)
+
         # Fetch the OpenAPI spec directly from external URL
         client = self._get_client()
 
         try:
-            response = await client.get(openapi_url)
+            response = await client.get(openapi_url, follow_redirects=True)
 
             if response.status_code == 404:
                 raise OpenAPIFetchError(
@@ -105,9 +107,15 @@ class DataservicesClient(BaseClient):
                     status_code=response.status_code,
                 )
 
-            return response.json()
+            try:
+                return response.json()
+            except ValueError as e:
+                raise OpenAPIFetchError(
+                    f"Invalid JSON in OpenAPI spec: {e}",
+                    status_code=200,
+                ) from e
 
+        except OpenAPIFetchError:
+            raise
         except Exception as e:
-            if isinstance(e, (OpenAPIFetchError, ValueError)):
-                raise
             raise OpenAPIFetchError(f"Failed to fetch OpenAPI spec: {e}") from e

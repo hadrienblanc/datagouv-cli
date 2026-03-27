@@ -1,9 +1,12 @@
 """Base HTTP client for data.gouv.fr APIs."""
 
 import json
+from urllib.parse import urlparse
 from typing import Any
 
 import httpx
+
+ALLOWED_URL_SCHEMES = ("https",)
 
 
 class DataGouvAPIError(Exception):
@@ -139,6 +142,23 @@ class BaseClient:
             raise DataGouvAPIError(f"Request timed out: {url}") from e
         except httpx.RequestError as e:
             raise DataGouvAPIError(f"Request failed: {e}") from e
+
+    @staticmethod
+    def validate_url(url: str) -> None:
+        """Validate that a URL uses an allowed scheme (HTTPS only).
+
+        Args:
+            url: URL to validate.
+
+        Raises:
+            ValueError: If the URL scheme is not allowed.
+        """
+        parsed = urlparse(url)
+        if parsed.scheme not in ALLOWED_URL_SCHEMES:
+            raise ValueError(
+                f"URL scheme '{parsed.scheme}' not allowed. "
+                f"Only {', '.join(ALLOWED_URL_SCHEMES)} URLs are accepted."
+            )
 
     async def _get(
         self,

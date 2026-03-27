@@ -205,3 +205,18 @@ class TestDataservicesClient:
                 )
                 with pytest.raises(OpenAPIFetchError, match="not found"):
                     await client.get_openapi_spec("ds-1")
+
+    @pytest.mark.asyncio
+    async def test_get_openapi_spec_rejects_http_url(self) -> None:
+        """Test that non-HTTPS OpenAPI URLs are rejected."""
+        response = {
+            "id": "ds-1",
+            "openapi_url": "http://insecure.example.com/spec.json",
+        }
+        async with DataservicesClient() as client:
+            with respx.mock:
+                respx.get("https://www.data.gouv.fr/api/1/dataservices/ds-1/").mock(
+                    return_value=Response(200, json=response)
+                )
+                with pytest.raises(ValueError, match="not allowed"):
+                    await client.get_openapi_spec("ds-1")

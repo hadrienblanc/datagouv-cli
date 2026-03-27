@@ -152,3 +152,17 @@ class TestResourcesClient:
                 )
                 with pytest.raises(ResourceDownloadError, match="Failed to download"):
                     await client.download("https://example.com/error.csv")
+
+    @pytest.mark.asyncio
+    async def test_download_rejects_http_url(self) -> None:
+        """Test that non-HTTPS URLs are rejected."""
+        async with ResourcesClient() as client:
+            with pytest.raises(ValueError, match="not allowed"):
+                await client.download("http://example.com/data.csv")
+
+    @pytest.mark.asyncio
+    async def test_download_rejects_file_url(self) -> None:
+        """Test that file:// URLs are rejected."""
+        async with ResourcesClient() as client:
+            with pytest.raises(ValueError, match="not allowed"):
+                await client.download("file:///etc/passwd")

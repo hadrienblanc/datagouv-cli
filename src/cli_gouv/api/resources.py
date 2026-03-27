@@ -80,14 +80,16 @@ class ResourcesClient(BaseClient):
         """Download a resource from its URL.
 
         Args:
-            url: Direct download URL for the resource.
+            url: Direct download URL for the resource (HTTPS only).
 
         Returns:
             Raw file content as bytes.
 
         Raises:
+            ValueError: If URL scheme is not HTTPS.
             ResourceDownloadError: If download fails.
         """
+        self.validate_url(url)
         client = self._get_client()
 
         try:
