@@ -12,7 +12,7 @@ from cli_gouv.api.datasets import DatasetsClient
 from cli_gouv.api.metrics import MetricsClient
 from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import _safe_str, format_error
+from cli_gouv.output.table import safe_str, format_error
 
 app = typer.Typer(
     name="dataset",
@@ -143,12 +143,12 @@ def _format_dataset_detail(dataset: dict[str, Any], console: Console) -> None:
     org = dataset.get("organization") or {}
     org_name = org.get("name") or org.get("acronym") or "N/A"
 
-    info_table.add_row("ID", _safe_str(dataset.get("id"), 50))
+    info_table.add_row("ID", safe_str(dataset.get("id"), 50))
     info_table.add_row("Organization", org_name)
-    info_table.add_row("License", _safe_str(dataset.get("license"), 30))
-    info_table.add_row("Created", _safe_str(dataset.get("created_at") or "N/A", 20))
-    info_table.add_row("Last Modified", _safe_str(dataset.get("last_modified") or "N/A", 20))
-    info_table.add_row("Page", _safe_str(dataset.get("page"), 80))
+    info_table.add_row("License", safe_str(dataset.get("license"), 30))
+    info_table.add_row("Created", safe_str(dataset.get("created_at") or "N/A", 20))
+    info_table.add_row("Last Modified", safe_str(dataset.get("last_modified") or "N/A", 20))
+    info_table.add_row("Page", safe_str(dataset.get("page"), 80))
 
     console.print(info_table)
 
@@ -211,11 +211,11 @@ def _format_resources_table(
             last_mod = "N/A"
 
         table.add_row(
-            _safe_str(res.get("id"), 20),
-            _safe_str(res.get("title"), 40),
-            _safe_str(res.get("format"), 8).upper(),
+            safe_str(res.get("id"), 20),
+            safe_str(res.get("title"), 40),
+            safe_str(res.get("format"), 8).upper(),
             size_str,
-            _safe_str(last_mod, 12),
+            safe_str(last_mod, 12),
         )
 
     console.print(table)
@@ -236,7 +236,7 @@ def _format_metrics_table(metrics: dict[str, Any], console: Console) -> None:
 
     for item in data:
         table.add_row(
-            _safe_str(item.get("month"), 10),
+            safe_str(item.get("month"), 10),
             str(item.get("views", 0)),
             str(item.get("downloads", 0)),
         )

@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.table import Table
 
 
-def _safe_str(value: Any, max_len: int = 50) -> str:
+def safe_str(value: Any, max_len: int = 50) -> str:
     """Safely convert value to string with max length.
 
     Args:
@@ -52,18 +52,18 @@ def format_datasets_table(
         org_name = org.get("name") or org.get("acronym") or "N/A"
 
         # Safely handle all values
-        ds_id = _safe_str(ds.get("id"), 20)
-        title = _safe_str(ds.get("title"), 50)
+        ds_id = safe_str(ds.get("id"), 20)
+        title = safe_str(ds.get("title"), 50)
         last_modified = ds.get("last_modified")
         if last_modified:
-            last_modified = _safe_str(last_modified[:10], 12)
+            last_modified = safe_str(last_modified[:10], 12)
         else:
             last_modified = "N/A"
 
         table.add_row(
             ds_id,
             title,
-            _safe_str(org_name, 30),
+            safe_str(org_name, 30),
             str(len(ds.get("resources") or [])),
             last_modified,
         )
@@ -99,10 +99,10 @@ def format_dataservices_table(
         base_url = ds.get("base_api_url") or ds.get("base_url")
 
         table.add_row(
-            _safe_str(ds.get("id"), 20),
-            _safe_str(ds.get("title"), 40),
-            _safe_str(org_name, 25),
-            _safe_str(base_url, 35),
+            safe_str(ds.get("id"), 20),
+            safe_str(ds.get("title"), 40),
+            safe_str(org_name, 25),
+            safe_str(base_url, 35),
         )
 
     console.print(table)

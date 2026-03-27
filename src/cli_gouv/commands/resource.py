@@ -10,7 +10,7 @@ from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.resources import ResourceDownloadError, ResourcesClient
 from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import _safe_str, format_error
+from cli_gouv.output.table import safe_str, format_error
 
 app = typer.Typer(
     name="resource",
@@ -160,7 +160,7 @@ def _format_query_results(result: dict[str, Any], console: Console) -> None:
         table.add_column(col, max_width=30)
 
     for row in data[:50]:  # Limit to 50 rows for display
-        table.add_row(*[_safe_str(row.get(col), 30) for col in columns[:10]])
+        table.add_row(*[safe_str(row.get(col), 30) for col in columns[:10]])
 
     console.print(table)
 
@@ -196,9 +196,9 @@ def _format_schema(schema: dict[str, Any], console: Console) -> None:
         description = field.get("description") or field.get("comment") or ""
 
         table.add_row(
-            _safe_str(name, 40),
-            _safe_str(field_type, 15),
-            _safe_str(description, 50),
+            safe_str(name, 40),
+            safe_str(field_type, 15),
+            safe_str(description, 50),
         )
 
     console.print(table)

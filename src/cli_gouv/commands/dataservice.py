@@ -11,7 +11,7 @@ from cli_gouv.api.client import DataGouvAPIError
 from cli_gouv.api.dataservices import DataservicesClient, OpenAPIFetchError
 from cli_gouv.commands import run_async
 from cli_gouv.output.json import format_raw_json
-from cli_gouv.output.table import _safe_str, format_error
+from cli_gouv.output.table import safe_str, format_error
 
 app = typer.Typer(
     name="dataservice",
@@ -113,14 +113,14 @@ def _format_dataservice_detail(dataservice: dict[str, Any], console: Console) ->
     org = dataservice.get("organization") or {}
     org_name = org.get("name") or org.get("acronym") or "N/A"
 
-    info_table.add_row("ID", _safe_str(dataservice.get("id"), 50))
+    info_table.add_row("ID", safe_str(dataservice.get("id"), 50))
     info_table.add_row("Organization", org_name)
-    info_table.add_row("Base URL", _safe_str(dataservice.get("base_api_url"), 80))
-    info_table.add_row("OpenAPI URL", _safe_str(dataservice.get("openapi_url"), 80))
-    info_table.add_row("License", _safe_str(dataservice.get("license"), 30))
-    info_table.add_row("Created", _safe_str(dataservice.get("created_at") or "N/A", 20))
-    info_table.add_row("Last Modified", _safe_str(dataservice.get("last_modified") or "N/A", 20))
-    info_table.add_row("Page", _safe_str(dataservice.get("page"), 80))
+    info_table.add_row("Base URL", safe_str(dataservice.get("base_api_url"), 80))
+    info_table.add_row("OpenAPI URL", safe_str(dataservice.get("openapi_url"), 80))
+    info_table.add_row("License", safe_str(dataservice.get("license"), 30))
+    info_table.add_row("Created", safe_str(dataservice.get("created_at") or "N/A", 20))
+    info_table.add_row("Last Modified", safe_str(dataservice.get("last_modified") or "N/A", 20))
+    info_table.add_row("Page", safe_str(dataservice.get("page"), 80))
 
     console.print(info_table)
 
@@ -179,8 +179,8 @@ def _format_openapi_spec(spec: dict[str, Any], console: Console) -> None:
     for method, path, summary in endpoints[:50]:
         table.add_row(
             method,
-            _safe_str(path, 50),
-            _safe_str(summary, 50),
+            safe_str(path, 50),
+            safe_str(summary, 50),
         )
 
     console.print(table)
