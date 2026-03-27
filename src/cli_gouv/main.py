@@ -5,6 +5,7 @@ from rich.console import Console
 
 from cli_gouv import __version__
 from cli_gouv.commands.dataset import app as dataset_app
+from cli_gouv.commands.dataservice import app as dataservice_app
 from cli_gouv.commands.resource import app as resource_app
 from cli_gouv.commands.search import app as search_app
 
@@ -26,6 +27,7 @@ def version_callback(value: bool) -> None:
 
 # Register sub-commands
 app.add_typer(dataset_app, name="dataset")
+app.add_typer(dataservice_app, name="dataservice")
 app.add_typer(resource_app, name="resource")
 app.add_typer(search_app, name="search")
 
