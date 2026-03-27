@@ -54,7 +54,7 @@ def show_dataservice(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Failed to get dataservice: {e}", console)
         raise typer.Exit(1)
 
@@ -94,7 +94,7 @@ def show_openapi(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Failed to get OpenAPI spec: {e}", console)
         raise typer.Exit(1)
 

@@ -77,7 +77,7 @@ def search_datasets(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Search failed: {e}", console)
         raise typer.Exit(1)
 
@@ -129,6 +129,6 @@ def search_dataservices(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Search failed: {e}", console)
         raise typer.Exit(1)

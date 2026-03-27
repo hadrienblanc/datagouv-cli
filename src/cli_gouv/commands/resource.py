@@ -62,7 +62,7 @@ def query_resource(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Query failed: {e}", console)
         raise typer.Exit(1)
 
@@ -97,7 +97,7 @@ def show_schema(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Failed to get schema: {e}", console)
         raise typer.Exit(1)
 
@@ -139,7 +139,7 @@ def download_resource(
     except ResourceDownloadError as e:
         format_error(f"Download error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Download failed: {e}", console)
         raise typer.Exit(1)
 

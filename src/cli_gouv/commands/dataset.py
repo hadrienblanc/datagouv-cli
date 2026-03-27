@@ -53,7 +53,7 @@ def show_dataset(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Failed to get dataset: {e}", console)
         raise typer.Exit(1)
 
@@ -88,7 +88,7 @@ def list_resources(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Failed to list resources: {e}", console)
         raise typer.Exit(1)
 
@@ -124,7 +124,7 @@ def show_metrics(
     except DataGouvAPIError as e:
         format_error(f"API error: {e.message}", console)
         raise typer.Exit(1)
-    except Exception as e:
+    except (OSError, RuntimeError) as e:
         format_error(f"Failed to get metrics: {e}", console)
         raise typer.Exit(1)
 
